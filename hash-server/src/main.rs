@@ -1,3 +1,5 @@
+mod hash_ring;
+
 use axum::{
     extract::{Path, State},
     response::Redirect,
