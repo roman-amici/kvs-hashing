@@ -23,7 +23,7 @@ impl HashRing {
 
     }
 
-    fn hostname_for_key(&self, key: &str) -> Option<String> {
+    pub fn hostname_for_key(&self, key: &str) -> Option<String> {
         let mut hasher  = hash_map::DefaultHasher::new();
 
         key.hash(&mut hasher);
