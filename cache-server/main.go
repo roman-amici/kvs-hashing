@@ -11,10 +11,12 @@ func main() {
 	router := mux.NewRouter()
 
 	cache := NewCache()
-	pCache := &cache
+	service := applicationService{
+		serverAddress: "localhost:5177",
+	}
 
 	router.HandleFunc("/serve/{key:.*}", func(w http.ResponseWriter, r *http.Request) {
-		handleCachedRequest(w, r, pCache)
+		handleCachedRequest(w, r, &cache, &service)
 	}).Methods("GET")
 
 	http.Handle("/", router)
@@ -26,7 +28,7 @@ func main() {
 	}
 }
 
-func handleCachedRequest(w http.ResponseWriter, r *http.Request, c *cache) {
+func handleCachedRequest(w http.ResponseWriter, r *http.Request, c *cache, service *applicationService) {
 	params := mux.Vars(r)
 	key := params["key"]
 
@@ -36,6 +38,13 @@ func handleCachedRequest(w http.ResponseWriter, r *http.Request, c *cache) {
 		return
 	}
 
-	// TODO: retrieve from the service
+	if value, err := service.GetApplicationData(key, r.Context()); err == nil {
+		c.Set(key, value)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(value)
+		return
+	}
+
 	w.WriteHeader(404)
 }
